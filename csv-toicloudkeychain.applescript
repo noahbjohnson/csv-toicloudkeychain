@@ -1,5 +1,18 @@
+-- set functions for reuse here
+
+to split(someText, delimiter) --> splits a string on a character
+	set AppleScript's text item delimiters to delimiter
+	set someText to someText's text items
+	set AppleScript's text item delimiters to {""} --> restore delimiters to default value
+	return someText
+end split
+
+-- get the version of safari
+set safVer to get version of application "Safari"
+set safariVersion to item 1 of split(safVer, ".")
+
 -- select the csv to import to iCloud keychain
-set theFile to (choose file with prompt "Select the CSV file")
+set theFile to (choose file with prompt "Select the CSV file. Please check the readme for the correct formatting!")
 
 -- read csv file
 set f to read theFile
@@ -39,15 +52,26 @@ repeat with i from 1 to length of recs
 			tell window 1
 				
 				click button "Add" of group 1 of group 1 of it
-				-- write fields
-				tell sheet 1 of it
-					set value of text field 1 of it to kcURL
-					keystroke tab
-					set value of text field 2 of it to kcUsername
-					keystroke tab
-					set value of text field 3 of it to kcPassword
-					keystroke return
-				end tell
+				
+				if (safariVersion = "11") then
+					tell last row of table 1 of scroll area of group 1 of group 1 of it
+						set value of text field 1 of it to kcURL
+						keystroke tab
+						set value of text field 2 of it to kcUsername
+						keystroke tab
+						set value of text field 3 of it to kcPassword
+						keystroke return
+					end tell
+				end if
+				
+				if (safariVersion = "12") then
+					tell sheet 1 of it
+						set value of text field 1 of it to kcURL
+						set value of text field 2 of it to kcUsername
+						set value of text field 3 of it to kcPassword
+						click button "Add Password"
+					end tell
+				end if
 				
 			end tell
 		end tell
